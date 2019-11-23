@@ -1,6 +1,7 @@
 # PythonApi_MC
-The main server is pruebaApi.py
 
-The main client is pruebaWebapp.py
+Run first mainServer.py
 
-First run pruebaApi.py and then the other script
+The main client is safeApp.py
+
+
