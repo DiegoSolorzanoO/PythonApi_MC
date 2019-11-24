@@ -9,17 +9,6 @@ app = Flask(__name__)
 
 secureSafe = readData('DB.txt')
 
-'''
-secureSafe = {
-    '[234324,34534]' : {
-        'public_key' : [234234,234234],
-        'accounts' : {
-            'Facebook' : [24234,234234,234234]
-        }
-    }
-}
-'''
-
 @app.route('/register', methods=['POST'])
 def registerUser():
     new_key = request.get_json()
@@ -47,7 +36,7 @@ def addAccount():
     else:
         return Response(json.dumps({'message':'User not found'}), status=400)
 
-@app.route('/editAccount', methods=['POST'])
+@app.route('/editAccount', methods=['PUT'])
 def editAccount():
     data = request.get_json()
     keyuser = str(data['public_key'])
@@ -64,7 +53,7 @@ def editAccount():
         return Response(json.dumps({'message':'User not found'}), status=400)
     return Response(json.dumps({'message':'Internal Error'}), status=400)
 
-@app.route('/deleteAccount', methods=['POST'])
+@app.route('/deleteAccount', methods=['DELETE'])
 def deleteAccount():
     data = request.get_json()
     keyuser = str(data['public_key'])

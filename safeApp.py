@@ -123,7 +123,7 @@ while True:
                 new_password = input('New Password: ')
                 if new_password:
                     password = RSA_O.encryptM(new_password,keys['public_key'])
-                    response = requests.post("http://127.0.0.1:5000/editAccount", json={'public_key':keys['public_key'],'name':name,'password':password})
+                    response = requests.put("http://127.0.0.1:5000/editAccount", json={'public_key':keys['public_key'],'name':name,'password':password})
                     if response.status_code == 400:
                         rData = json.loads(response.content.decode('utf8'))
                         print('========================================')
@@ -148,7 +148,7 @@ while True:
                 break
             old_pass = input('Password: ')
             if CheckPass(name,old_pass):
-                response = requests.post("http://127.0.0.1:5000/deleteAccount", json={'public_key':keys['public_key'],'name':name})
+                response = requests.delete("http://127.0.0.1:5000/deleteAccount", json={'public_key':keys['public_key'],'name':name})
                 if response.status_code == 400:
                     rData = json.loads(response.content.decode('utf8'))
                     print('========================================')
@@ -168,20 +168,3 @@ while True:
         print('========================================')
         time.sleep(3)
         break
-
-
-
-# response = requests.get("http://127.0.0.1:5000")
-# print(response.json())
-
-# response = requests.get("http://127.0.0.1:5000/warehouse")
-# print(response.json())
-
-# response = requests.get("http://127.0.0.1:5000/warehouse/Knife")
-# print(response.json())
-
-# response = requests.post("http://127.0.0.1:5000/sendKey", json={'New Public Key':public_key})
-# print(response.json())
-
-
-
