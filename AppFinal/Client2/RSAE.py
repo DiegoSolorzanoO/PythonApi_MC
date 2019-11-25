@@ -27,7 +27,7 @@ class RSAE():
 
     # Method which returns the public and private keys
     def GenerateKeys(self):
-        primes = [i for i in range(100,400) if self.isPrime(i)]
+        primes = [i for i in range(100,250) if self.isPrime(i)]
         p = random.choice(primes)
         q = random.choice(primes)
         n = p*q

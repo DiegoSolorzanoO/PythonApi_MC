@@ -4,10 +4,18 @@ from flask import request
 from flask import Response
 import json
 from jsonDB import *
+from RSAE import *
 
 app = Flask(__name__)
 
 secureSafe = readData('DB.txt')
+RSA_O = RSAE()
+keys = RSA_O.GenerateKeys()
+
+@app.route('/getServerKey', methods=['GET'])
+def getServerKey():
+    data = {'serverpk' : keys[0]}
+    return jsonify(data)
 
 @app.route('/register', methods=['POST'])
 def registerUser():
@@ -18,14 +26,14 @@ def registerUser():
             'accounts' : {}
         }
     saveData('DB.txt',secureSafe)
-    return jsonify({'New Public Key' : new_key[key]})
+    return jsonify({'serverpk' : keys[0]})
 
 @app.route('/addAccount', methods=['POST'])
 def addAccount():
     data = request.get_json()
-    keyuser = str(data['public_key'])
+    keyuser = RSA_O.de_encryptM(data['public_key'],keys[1])
     if keyuser in secureSafe:
-        name = data['name']
+        name = RSA_O.de_encryptM(data['name'],keys[1])
         if name not in secureSafe[keyuser]['accounts']:
             password = data['password']
             secureSafe[keyuser]['accounts'][name] = password
@@ -39,8 +47,8 @@ def addAccount():
 @app.route('/editAccount', methods=['PUT'])
 def editAccount():
     data = request.get_json()
-    keyuser = str(data['public_key'])
-    name = data['name']
+    keyuser = RSA_O.de_encryptM(data['public_key'],keys[1])
+    name = RSA_O.de_encryptM(data['name'],keys[1])
     password = data['password']
     if keyuser in secureSafe:
         if name in secureSafe[keyuser]['accounts']:
@@ -56,9 +64,9 @@ def editAccount():
 @app.route('/deleteAccount', methods=['DELETE'])
 def deleteAccount():
     data = request.get_json()
-    keyuser = str(data['public_key'])
+    keyuser = RSA_O.de_encryptM(data['public_key'],keys[1])
     if keyuser in secureSafe:
-        name = data['name']
+        name = RSA_O.de_encryptM(data['name'],keys[1])
         if name in secureSafe[keyuser]['accounts']:
             del secureSafe[keyuser]['accounts'][name]
             saveData('DB.txt',secureSafe)
@@ -69,9 +77,11 @@ def deleteAccount():
         return Response(json.dumps({'message':'User not found'}), status=400)
     return Response(json.dumps({'message':'Internal Error'}), status=400)
 
-@app.route('/getAccount/<string:name>/<string:token>', methods=['GET'])
-def getAccount(name,token):
-    data = {}
+@app.route('/getAccount', methods=['GET'])
+def getAccount():
+    rjson = request.get_json()
+    name = RSA_O.de_encryptM(rjson['name'],keys[1])
+    token = RSA_O.de_encryptM(rjson['data'],keys[1])
     if token in secureSafe:
         if name in secureSafe[token]['accounts']:
             data = {
@@ -85,21 +95,25 @@ def getAccount(name,token):
         return Response(json.dumps({'message':'User not found'}), status=400)
     return Response(json.dumps({'message':'Internal Error'}), status=400)
 
-@app.route('/getAccounts/<string:token>', methods=['GET'])
-def getAccounts(token):
-    data = {}
-    if token in secureSafe:
-        data = secureSafe[token]['accounts']
+@app.route('/getAccounts', methods=['GET'])
+def getAccounts():
+    data = request.get_json()
+    decryptedToken = RSA_O.de_encryptM(data['data'],keys[1])
+    if decryptedToken in secureSafe:
+        data = secureSafe[decryptedToken]['accounts']
     return jsonify(data)
 
-@app.route('/getList/<string:token>', methods=['GET'])
-def getList(token):
-    data = {}
+@app.route('/getList', methods=['GET'])
+def getList():
+    data = request.get_json()
     aList = []
-    if token in secureSafe:
-        for key in secureSafe[token]['accounts']:
+    decryptedToken = RSA_O.de_encryptM(data['data'],keys[1])
+    if decryptedToken in secureSafe:
+        for key in secureSafe[decryptedToken]['accounts']:
             aList.append(key)
         data = {'accounts':aList}
+    else:
+        return jsonify({'accounts':[]})
     return jsonify(data)
 
 if __name__ == "__main__":

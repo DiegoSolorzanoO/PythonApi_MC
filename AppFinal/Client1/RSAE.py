@@ -27,43 +27,27 @@ class RSAE():
 
     # Method which returns the public and private keys
     def GenerateKeys(self):
-        primes = [i for i in range(100,200) if self.isPrime(i)]
+        primes = [i for i in range(100,250) if self.isPrime(i)]
         p = random.choice(primes)
         q = random.choice(primes)
         n = p*q
-        fi_n = (p - 1)*(q - 1) 
-        '''
-        print('p: '+str(p))
-        print('q: '+str(q))
-        print('n: '+str(n))
-        print('Fi_n: '+str(fi_n))
-        '''
+        fi_n = (p - 1)*(q - 1)
         public_exp = []
         counter = 0
         for i in range(2,fi_n+1):
-            if counter==30:
+            if counter==50:
                 break
             if self.MCD(i,fi_n)==1:
                 public_exp.append(i)
                 counter+=1
         e = random.choice(public_exp)
-
-        # print('e: '+str(e))
-
         d = 0
         for i in range(1,fi_n+1):
             if ((i*e)%fi_n)==(1%fi_n):
                 d = i
                 break
-
-        # print('d: '+str(d))
-
         public_key = [n,e]
         private_key = [n,d]
-
-        # print('Public key: ' + str(public_key))
-        # print('Private key: ' + str(private_key))
-
         return [public_key,private_key]
 
 
